@@ -1,4 +1,21 @@
-## 
+## Iceduck
+### Abstract
+DataLakes are getting more and more common, but infrastructure is often based on proprietary SaaS offerings or very complex to setup. Beside that, many developers that are used to work in traditional DWH environments with visual ETL tools and SQL face a transition to a new tooling e.g. with Spark/PySpark which makes transitions to DataLake environments more complex.
+
+[DuckDBs](https://duckdb.org) capabilties of [Apache Iceberg](https://iceberg.apache.org) promise an easy integration of an DataLakish storage layer into a tool based ELT/ETL process.
+
+Iceduck examines a tool setup that enables to
+- read ("extract") data from any sources with [Apache Hop](https://hop.apache.org)
+- use Apache Hop to write ("load") this data to [Apache Iceberg](https://iceberg.apache.org) tables in an object storage like S3 or MinIO using [DuckDB](https://duckdb.org) 
+- integrate the Iceberg tables into a [Postgres](https://postgresql.org) database using [pg_duckdb](https://github.com/duckdb/pg_duckdb) 
+- transform this data with [dbt](https://www.getdbt.com)
+
+The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it.
+
+
+
+
+
 
 ```docker compose up -d``` creates a new Postgres DB
 

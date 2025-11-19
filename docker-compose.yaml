@@ -85,13 +85,6 @@ services:
         aliases:
           - database
 
-  duckcli:
-    image: duckdb/duckdb
-    volumes:
-      - ./files/duckdb:/workspace
-    networks:
-      iceberg_net:
-
 networks:
   iceberg_net:
 
