@@ -1,34 +1,43 @@
 services:
-  spark-iceberg:
-    image: tabulario/spark-iceberg
-    container_name: spark-iceberg
-    build: spark/
-    depends_on:
-      - rest
-      - minio
-    volumes:
-      - ./files/spark/conf:/opt/spark/conf
-      - ./files/spark/warehouse:/home/iceberg/warehouse
-      - ./files/spark/notebooks:/home/iceberg/notebooks/notebooks
-    env_file: "iceduck.env"
+
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    container_name: iceduck_trino
+    env_file: "./etc/iceduck.env"
     ports:
-      - 8888:8888
-      - 8080:8080
-      - 10000:10000
-      - 10001:10001
+      - ${TRINO_UI_PORT}:8080
+    volumes:
+      - ./files/data/trino/etc:/etc/trino
+      - ./files/data/trino/data:/data
     networks:
       iceberg_net:
+        aliases:
+          - trino
 
-  rest:
-    image: apache/iceberg-rest-fixture
-    container_name: rest
+
+  polaris:
+    image: apache/polaris:latest
+    container_name: iceduck_polaris
     ports:
-      - 8181:8181
-    env_file: "iceduck.env"
+      # API port
+      - ${POLARIS_API_PORT}:8181
+      # Management port (metrics and health checks)
+      - ${POLARIS_MGMT_PORT}:8182
+    depends_on:
+      minio:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+    env_file: "./etc/iceduck.env"
     environment:
-      - CATALOG_WAREHOUSE=s3://warehouse
-      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
-      - CATALOG_S3_ENDPOINT=http://minio:9000
+      - polaris.realm-context.realms=${POLARIS_REALM}
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:${POLARIS_MGMT_PORT}/q/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
     networks:
       iceberg_net:
         aliases:
@@ -36,54 +45,69 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
-    container_name: minio
-    env_file: "iceduck.env"
+    container_name: iceduck_minio
+    env_file: "./etc/iceduck.env"
     volumes:
-        - ./files/minio:/data
+        - ./files/data/minio:/data
     ports:
-      - 9001:9001
-      - 9000:9000
-    command: ["server", "/data", "--console-address", ":9001"]
+      - ${MINIO_UI_PORT}:9001
+      - ${MINIO_API_PORT}:9000
+    command: ["server", "/data", "--console-address", ":${MINIO_UI_PORT}"]
+    healthcheck:
+      test: ["CMD", "curl", "http://127.0.0.1:${MINIO_API_PORT}/minio/health/live"]
+      interval: 1s
+      timeout: 10s
     networks:
       iceberg_net:
         aliases:
           - warehouse.minio
 
-  minio_init:
-    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
-    container_name: mc
-    depends_on:
-      - minio
-    env_file: "iceduck.env"
-    entrypoint: >
-      /bin/bash -c "
-      until ( mc alias set minio http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} ) do echo '...waiting...' && sleep 1; done;
-      mc ls minio/warehouse 2>&1 >/dev/null;
-      if [[ $? -ne 0 ]] ; then
-        mc mb minio/warehouse;
-      fi;
-      mc anonymous set public minio/warehouse;
-      tail -f /dev/null
-      "
-    networks:
-      iceberg_net:
-
-
   postgres:
     build:
       context: .
-      dockerfile: ./docker/postgres/Dockerfile
-    container_name: database
+      dockerfile: ./files/docker/postgres/Dockerfile
+    container_name: iceduck_db
     ports: 
-      - "5432:5432"
-    env_file: "iceduck.env"
+      - ${POSTGRES_PORT}:5432
+    env_file: "./etc/iceduck.env"
     volumes:
-      - ./files/postgres/data:/var/lib/postgresql/data
-      - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./files/data/postgres/data:/var/lib/postgresql/data
+      - ./files/docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       iceberg_net:
         aliases:
           - database
+
+  curlshell:
+    build:
+      context: .
+      dockerfile: ./files/docker/curlshell/Dockerfile
+
+  spark:
+    build: ./files/docker/spark
+    container_name: iceduck_spark
+    depends_on:
+      - polaris
+      - minio
+    volumes:
+      - ./files/data/spark/config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./files/data/spark/config/pyiceberg.yaml:/root/.pyiceberg.yaml
+      - ./files/data/spark/warehouse:/home/iceberg/warehouse
+      - ./files/data/spark/notebooks:/home/iceberg/notebooks/notebooks
+    env_file: "./etc/iceduck.env"
+    ports:
+      - ${SPARK_JUPYTER_PORT}:8888
+      - ${SPARK_UI_PORT}:8080
+      - 10000:10000
+      - 10001:10001
+    networks:
+      iceberg_net:
+
 
 networks:
   iceberg_net:

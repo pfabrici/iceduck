@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -a -o pipefail
+source ./etc/iceduck.env
+
+DOCKEROPTS="--network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/bash  -v ./files/data/mc:/root/.mc  minio/mc:RELEASE.2025-04-16T18-13-26Z "
+
+if [ $# -ne 0 ] ; then
+	cat $1 | docker run --rm -i ${DOCKEROPTS}
+	ECODE=$?
+else
+	docker run --rm -it ${DOCKEROPTS}
+	ECODE=$?
+fi
+
+exit $ECODE

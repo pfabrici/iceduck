@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -a -o pipefail
+source ./etc/iceduck.env
+
+if [ $# -ne 0 ] ; then
+	FNAME=$1
+	shift
+	DOCKEROPTS=${*:- -U postgres}
+fi
+
+if [ "X${FNAME}" != "X" ] ; then
+	cat $FNAME | docker exec -i iceduck_db psql ${DOCKEROPTS}
+	ECODE=$?
+else
+	docker exec -it iceduck_db psql -U postgres 
+	ECODE=$?
+fi
+
+exit $ECODE

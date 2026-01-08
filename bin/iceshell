@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -a -o pipefail
+source ./etc/iceduck.env
+
+DOCKEROPTS="--network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell"
+
+if [ $# -ne 0 ] ; then
+set -x
+	cat $1 | docker run --rm -i ${DOCKEROPTS}
+	ECODE=$?
+else
+	docker run --rm -it ${DOCKEROPTS}
+	ECODE=$?
+fi
+
+exit $ECODE

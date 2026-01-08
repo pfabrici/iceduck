@@ -1,5 +1,8 @@
-## Iceduck
-### Abstract
+# Iceduck
+
+https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
+
+## Abstract
 DataLakes are getting more and more common, but infrastructure is often based on proprietary SaaS offerings or very complex to setup. Beside that, many developers that are used to work in traditional DWH environments with visual ETL tools and SQL face a transition to a new tooling e.g. with Spark/PySpark which makes transitions to DataLake environments more complex.
 
 [DuckDBs](https://duckdb.org) capabilties of [Apache Iceberg](https://iceberg.apache.org) promise an easy integration of an DataLakish storage layer into a tool based ELT/ETL process.
@@ -10,8 +13,12 @@ Iceduck examines a tool setup that enables to
 - integrate the Iceberg tables into a [Postgres](https://postgresql.org) database using [pg_duckdb](https://github.com/duckdb/pg_duckdb) 
 - transform this data with [dbt](https://www.getdbt.com)
 
-The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it.
+The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it. It is originally build on the (https://github.com/databricks/docker-spark-iceberg) repository.
 
+## Usage
+### Docker
+The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it.
+### Apache Hop
 
 
 

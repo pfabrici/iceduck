@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -a -o pipefail
+source ./etc/iceduck.env
+
+docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env  apache/polaris-admin-tool $*
+ECODE=$?
+exit $ECODE
