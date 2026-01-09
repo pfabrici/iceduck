@@ -1,44 +1,55 @@
 # Iceduck
-
-https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
-
 ## Abstract
-DataLakes are getting more and more common, but infrastructure is often based on proprietary SaaS offerings or very complex to setup. Beside that, many developers that are used to work in traditional DWH environments with visual ETL tools and SQL face a transition to a new tooling e.g. with Spark/PySpark which makes transitions to DataLake environments more complex.
+DataLakes are getting more and more common, but infrastructure is often based on proprietary SaaS offerings. Fortunatly it is possible to use open software to put together an infrastructure stack at least for learning or development purposes. This makes gaining knowledge without following the companies marketing promises or being limited to one packaged stack a lot easier.
 
-[DuckDBs](https://duckdb.org) capabilties of [Apache Iceberg](https://iceberg.apache.org) promise an easy integration of an DataLakish storage layer into a tool based ELT/ETL process.
+IceDuck offers a DataLake infrastructure based on:
+- MinIO, the object storage
+- Trino, an SQL engine
+- Apache Polaris, a catalog for Apache Iceberg
+- Postgres as the metastore for Apache Polaris and example for traditional data store
+- Jupyter and Spark as an data exploration platform
 
-Iceduck examines a tool setup that enables to
-- read ("extract") data from any sources with [Apache Hop](https://hop.apache.org)
-- use Apache Hop to write ("load") this data to [Apache Iceberg](https://iceberg.apache.org) tables in an object storage like S3 or MinIO using [DuckDB](https://duckdb.org) 
-- integrate the Iceberg tables into a [Postgres](https://postgresql.org) database using [pg_duckdb](https://github.com/duckdb/pg_duckdb) 
-- transform this data with [dbt](https://www.getdbt.com)
+Postgres has the DuckDB extension installed, so that it is possible to access Iceberg tables from the database.
+The setup is not meant to be used in production environments.
 
-The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it. It is originally build on the (https://github.com/databricks/docker-spark-iceberg) repository.
+With this a lot of use cases might be investigated. Just to name a few :
+- use Trino as a query tool for Apache Iceberg tables
+- compare Postgres/DuckDB to Trino as query tools for Apache Iceberg
+- connect (E)TL tools like dbt or Apache Hop to an Apache Iceberg DataLake using Trino as query engine
+- connect Reporting Tools like Apache Superset to Apache Iceberg using Postgres/DuckDB
+
+Beside, it is simply possible to learn the basics of SparkSQL, PySpark, Iceberg etc.
+
+IceDuck got its name, because the original intention was to explore the DuckDB capabilties in combination with Apache Iceberg tables. On the way Trino, Jupyter, Spark etc. was added but the name stayed.
 
 ## Usage
-### Docker
-The Iceduck repo is based on docker and docker compose so you will need an appropriate environment to run it.
-### Apache Hop
+### Requirements
+Make sure that you have git and docker+compose installed on your linux box. git clone the iceduck repository.
+### Starting, stopping, initializing
+For convenience reasons a simple wrapper script *iceduck* is provided in the main folder of the repository. It accepts a couple of commands as parameter:
+- *./iceduck clean* tries to docker down the stack and removes all runtime data from the folders
+- *./iceduck init* prepares all configuration files based on the configurations in etc/iceduck.env and tries to start the stack afterwards. This should be used at the very first start or after issuing *./iceduck clean*
+- *./iceduck start* is equivalent to a docker compose up -d
+- *./iceduck stop* is equivalent to a docker compose down
+
+### Accessing services
+#### MinIO
+The administration tool *mc* can be started using ``bin/mc``. As ``./iceduck init`` uses this script, too, a connection alias *minio* to your local MinIO instance has already been created.
+
+After running ``bin/mc`` a docker container running with a shell is started. Within you can now run mc commands, e.g. 
+```
+mc ls minion/warehouse
+```
+Alternatively it is possible to pass command files to ``bin/mc``, e.g. ``cat mccmds.sh | bin/mc``
+
+Using a browser you might connect to the MinIO administrative WebUI  at ``http://localhost:9000``. The credentials are admin/password, as long as you do not change them in etc/iceduck before a *iceduck init*.
+
+See the MinIO documentation for further instructions.
+
+#### Trino
+Run 
 
 
 
-
-
-```docker compose up -d``` creates a new Postgres DB
-
-## pg_duckdb
-
-
-
-
-SELECT duckdb.create_simple_secret(    type := 'S3',    key_id := 'admin',    secret := 'password',    region := 'us-east-1',    endpoint := 'minio:9000',    url_style := 'path',    use_ssl := 'false');
-SELECT duckdb.create_simple_secret(    type := 'ICEBERG',    key_id := null,    secret := null,    region := 'us-east-1',        session_token := 'dummy');      
-
-select duckdb.raw_query('CREATE OR REPLACE SECRET minio_s3 (  TYPE S3,  KEY_ID  "admin",  SECRET  "password",  ENDPOINT "minio:9000",  URL_STYLE "path",  USE_SSL false)');
-select duckdb.raw_query('CREATE OR REPLACE SECRET iceberg_rest (  TYPE ICEBERG,  TOKEN 'dummy')');
-select duckdb.raw_query('CREATE OR REPLACE SECRET iceberg_rest (  TYPE ICEBERG,  TOKEN "dummy")');
-select duckdb.raw_query('ATTACH IF NOT EXISTS "warehouse" AS warehouse (  TYPE ICEBERG,  ENDPOINT "http://iceberg-rest:8181",  SECRET iceberg_rest)');
-select duckdb.raw_query('ATTACH IF NOT EXISTS warehouse AS warehouse (  TYPE ICEBERG,  ENDPOINT "http://iceberg-rest:8181",  SECRET iceberg_rest)');
-select duckdb.raw_query("ATTACH IF NOT EXISTS warehouse AS warehouse (  TYPE ICEBERG,  ENDPOINT 'http://iceberg-rest:8181',  SECRET iceberg_rest)");
-select duckdb.raw_query('ATTACH IF NOT EXISTS ''warehouse'' AS warehouse (  TYPE ICEBERG,  ENDPOINT ''http://iceberg-rest:8181'',  SECRET iceberg_rest)');
-
+## References
+https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
