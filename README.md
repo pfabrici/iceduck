@@ -33,21 +33,49 @@ For convenience reasons a simple wrapper script *iceduck* is provided in the mai
 - *./iceduck stop* is equivalent to a docker compose down
 
 ### Accessing services
+All wrapper scripts need to be started from the main folder of the repo.
+
 #### MinIO
-The administration tool *mc* can be started using ``bin/mc``. As ``./iceduck init`` uses this script, too, a connection alias *minio* to your local MinIO instance has already been created.
+The MinIO administration tool *mc*, that is helpfull for managing buckets, access etc., can be started using the ``bin/mc`` wrapper. As ``./iceduck init`` uses this script during the initialization phase, too, a connection alias *minio* to your local MinIO instance has already been created.
 
 After running ``bin/mc`` a docker container running with a shell is started. Within you can now run mc commands, e.g. 
 ```
-mc ls minion/warehouse
+mc ls minio/warehouse
 ```
-Alternatively it is possible to pass command files to ``bin/mc``, e.g. ``cat mccmds.sh | bin/mc``
+Alternatively it is possible to pass command files to ``bin/mc``, e.g. ``cat mcscript.sh | bin/mc``
 
-Using a browser you might connect to the MinIO administrative WebUI  at ``http://localhost:9000``. The credentials are admin/password, as long as you do not change them in etc/iceduck before a *iceduck init*.
+With a browser you might connect to the MinIO administrative WebUI at ``http://localhost:9001``. The credentials are admin/password, as long as you do not change them in etc/iceduck before a *iceduck init*.
 
 See the MinIO documentation for further instructions.
 
 #### Trino
-Run 
+There is another wrapper script to access the Trino command line interface. Use ``bin/trino`` to start and connect. You can then run Trino commands, e.g.
+```
+SHOW CATALOGS
+```
+which would show you that there are already two catalogs ( warehouse and pgice ) created.
+
+At ``http://localhost:8060`` you can access the Trino cluster overview, which shows you current run details of the ( one-node) Trino cluster.
+
+### Polaris
+The configuration of Polaris essentially involves managing catalogs and rights and bootstrapping a catalog at the beginning. The configuration is mainly done by calling API endpoints, which can be done with curl. Some tasks like bootstrapping are only supported by cli calls.
+
+Therefore Iceduck contains two wrapper scripts, that start specialized docker containers : 
+
+* ``bin/iceshell`` opens a bash shell with curl, iceduck environment variables and network set 
+* ``bin/poladm`` is based on a container with the polaris admin tools. It contains e.g. the bootstrap command.
+
+Both commands are used in the *iceduck* init section as well.
+
+### Postgres
+Postgres is acccessible by two different ways as well :
+* Docker Port 5432 is open, so you can easily connect to the database using a (JDBC) client tool
+* ``bin/psql`` starts psql directly in the container using the postgres user.
+
+### Jupyter/Spark
+
+Jupyter Notebooks can be accessed at (http://localhost:8888) . 
+See the running spark jobs at (http://localhost:8080)
 
 
 
