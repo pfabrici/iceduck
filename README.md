@@ -1,32 +1,31 @@
 # Iceduck
 ## Abstract
-DataLakes are getting more and more common, but infrastructure is often based on proprietary SaaS offerings. Fortunatly it is possible to use open software to put together an infrastructure stack at least for learning or development purposes. This makes gaining knowledge without following the companies marketing promises or being limited to one packaged stack a lot easier.
+[DataLakes](https://en.wikipedia.org/wiki/Data_lake) are getting more and more common, and replace not only traditional reporting systems like Data Warehouses. Infrastructure seems to be offered only by software and SaaS vendors as commercial solutions, which makes learning the non-proprietary basics of Data Lakes difficult. Fortunatly it is possible to use open source software to put together an DataLake infrastructure at least for learning or development purposes. This [Iceduck Repository](https://codeberg.org/pfabricius/iceduck) tries to provide an independant stack.
 
-IceDuck offers a DataLake infrastructure based on:
-- MinIO, the object storage
-- Trino, an SQL engine
-- Apache Polaris, a catalog for Apache Iceberg
-- Postgres as the metastore for Apache Polaris and example for traditional data store
-- Jupyter and Spark as an data exploration platform
+IceDuck implements a DataLake infrastructure with Docker compose based on:
+- [MinIO](https://www.min.io) as the underlying object storage
+- [Apache Polaris](https://polaris.apache.org), which implements a REST catalog for Apache Iceberg
+- [Trino](https://www.trino.io) as a (SQL) query engine that can access and combine many different source types
+- [Postgres](https://postgresql.org) as the metastore for Apache Polaris, example for a more traditional data store and query engine for the DataLake using the DuckDB engine
+- [Spark](https://spark.apache.org) as a alternative distributed query platform 
+- [Jupyter](https://jupyter.org), which provides Web notebooks to interact with Spark and the DataLake
 
-Postgres has the DuckDB extension installed, so that it is possible to access Iceberg tables from the database.
-The setup is not meant to be used in production environments.
+The stack is not meant to be used in production environments, but allows to investigate a lot of use cases. It shall make running a demo Data Lake as easy as running one simple script.
 
-With this a lot of use cases might be investigated. Just to name a few :
-- use Trino as a query tool for Apache Iceberg tables
-- compare Postgres/DuckDB to Trino as query tools for Apache Iceberg
-- connect (E)TL tools like dbt or Apache Hop to an Apache Iceberg DataLake using Trino as query engine
-- connect Reporting Tools like Apache Superset to Apache Iceberg using Postgres/DuckDB
+There has been a lot of input coming from other repositories and articles. See the Reference section for more.
 
-Beside, it is simply possible to learn the basics of SparkSQL, PySpark, Iceberg etc.
-
-IceDuck got its name, because the original intention was to explore the DuckDB capabilties in combination with Apache Iceberg tables. On the way Trino, Jupyter, Spark etc. was added but the name stayed.
+IceDuck got its name, because the original intention was to explore the DuckDB capabilties in combination with Apache Iceberg tables. On the way Trino, Jupyter, Spark etc. were added but the name stayed.
 
 ## Usage
 ### Requirements
-Make sure that you have git and docker+compose installed on your linux box. git clone the iceduck repository.
+The software stack is implemented as a docker compose stack and should run on any Docker platform. The wrapper scripts are all Linux bash, so a Linux box is the preferred home of Iceduck.
+
+To start, make sure that you have git, [docker+compose](https://docs.docker.com/engine/install/) installed on your. git clone the iceduck repository.
+
 ### Starting, stopping, initializing
-For convenience reasons a simple wrapper script *iceduck* is provided in the main folder of the repository. It accepts a couple of commands as parameter:
+
+For convenience reasons one simple wrapper script *iceduck* is provided in the main folder of the repository. It accepts a couple of commands as parameter:
+
 - *./iceduck clean* tries to docker down the stack and removes all runtime data from the folders
 - *./iceduck init* prepares all configuration files based on the configurations in etc/iceduck.env and tries to start the stack afterwards. This should be used at the very first start or after issuing *./iceduck clean*
 - *./iceduck start* is equivalent to a docker compose up -d
@@ -78,6 +77,7 @@ Jupyter Notebooks can be accessed at (http://localhost:8888) .
 See the running spark jobs at (http://localhost:8080)
 
 
-
 ## References
 https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
+https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml
+https://duckdb.org/docs/stable/core_extensions/postgres

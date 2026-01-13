@@ -1,16 +1,53 @@
 #!/bin/bash
-
 set -a -o pipefail
+
+_usage() {
+
+	exit 2
+}
+
 source ./etc/iceduck.env
 
 DOCKEROPTS="--network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/bash  -v ./files/data/mc:/root/.mc  minio/mc:RELEASE.2025-04-16T18-13-26Z "
+unset EXEC FNAME CMD
+ECODE=0
 
-if [ $# -ne 0 ] ; then
-	cat $1 | docker run --rm -i ${DOCKEROPTS}
-	ECODE=$?
-else
-	docker run --rm -it ${DOCKEROPTS}
-	ECODE=$?
-fi
+ARGS=$(getopt -o f:c: --long file:,command: -- "$@")
+[ $? -ne 0 ] && _usage
+
+eval set -- "$ARGS"
+while [ 1 == 1 ]; do
+  case "$1" in
+    -f | --filename)   	if [ -z $EXEC ] ; then
+							EXEC="File"
+							FNAME="$2"
+							[ ! -f $FNAME ] && _usage
+						fi
+						shift   
+						;;
+    -c | --command)     if [ -z $EXEC ] ; then
+							EXEC="Command"
+							CMD="$2"
+						fi
+						shift   
+						;;
+    --) shift; break ;;
+    *) shift; break ;;
+  esac
+done
+
+[ -z $EXEC ] && EXEC="Shell"
+
+case "${EXEC}" in
+	"File") cat $FNAME | docker run --rm -i ${DOCKEROPTS} 
+			ECODE=$?
+			;;
+	"Command") echo "${CMD}" | docker run --rm -i ${DOCKEROPTS} 
+			ECODE=$?
+			;;
+	"Shell") docker run --rm -it ${DOCKEROPTS}
+			ECODE=$?
+			;;
+esac
 
 exit $ECODE

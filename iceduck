@@ -1,5 +1,9 @@
 #!/bin/bash
 
+START_DIR=$PWD
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR
+
 set -a
 source ./etc/iceduck.env
 
@@ -8,26 +12,36 @@ case $1 in
 
             echo "----- Trino config schreiben"
             ./files/init/prep_trino.sh
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- configure Spark"
             ./files/init/prep_spark.sh
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- Stack starten"
             docker compose up -d
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- Bucket im Minio anlegen"
-            bin/mc ./files/init/prep_minio.sh
+            bin/mc -f ./files/init/prep_minio.sh
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- bootstrap Polaris"
             bin/poladm bootstrap -r ${POLARIS_REALM} -c "${POLARIS_REALM},${POLARIS_ROOT_CLIENT_ID},${POLARIS_ROOT_CLIENT_SECRET}" --print-credentials
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- configure Polaris"
             bin/iceshell ./files/init/prep_polaris.sh
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             ;;
     clean)
             docker compose down
+            [ $? -ne 0 ] && { ECODE=10; break; }
+
             sudo rm -rf ./files/data/*
+            [ $? -ne 0 ] && { ECODE=10; break; }
+
             mkdir -p ./files/data/mc \
                 ./files/data/postgres/data \
                 ./files/data/minio \
@@ -36,11 +50,21 @@ case $1 in
                 ./files/data/spark/config \
                 ./files/data/spark/warehouse \
                 ./files/data/spark/notebooks \
+            [ $? -ne 0 ] && { ECODE=10; break; }
+
             ;;
-    start)   docker compose up -d ;;
-    stop)   docker compose down ;;
-    restart)   docker compose down && docker compose up -d ;;
+    start)   docker compose up -d 
+            [ $? -ne 0 ] && { ECODE=10; break; }
+            ;;
+    stop)   docker compose down 
+            [ $? -ne 0 ] && { ECODE=10; break; }
+            ;;
+    restart)   docker compose down && docker compose up -d 
+            [ $? -ne 0 ] && { ECODE=10; break; }
+            ;;
     *)      ;;
 esac    
 
+cd $START_DIR
+exit $ECODE
 
