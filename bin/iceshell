@@ -1,17 +1,24 @@
 #!/bin/bash
+set -ao pipefail
 
-set -a -o pipefail
 source ./etc/iceduck.env
+. ./bin/icelib.sh
+ECODE=0
 
-DOCKEROPTS="--network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell"
+_parseargs "$@"
 
-if [ $# -ne 0 ] ; then
-set -x
-	cat $1 | docker run --rm -i ${DOCKEROPTS}
-	ECODE=$?
-else
-	docker run --rm -it ${DOCKEROPTS}
-	ECODE=$?
-fi
+case ${EXEC} in
+	"file") 	cat $FNAME | \
+					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+				ECODE=$?
+				;;
+	"clicmd")	echo "${CLICMD}" | \
+					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+				ECODE=$?
+				;;
+	"shell") 	docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+				ECODE=$?
+				;;
+esac
 
 exit $ECODE

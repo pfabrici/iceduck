@@ -1,8 +1,24 @@
 #!/bin/bash
+set -ao pipefail
 
-set -a -o pipefail
 source ./etc/iceduck.env
+. ./bin/icelib.sh
 
-docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env  apache/polaris-admin-tool $*
-ECODE=$?
+_parseargs "$@"
+
+
+case ${EXEC} in
+	"file") 	cat $FNAME | \
+					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env -entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
+				ECODE=$?
+				;;
+	"clicmd")	echo "java -jar polaris-admin-tool.jar ${CLICMD}" | \
+				docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
+				ECODE=$?
+				;;
+	"shell") 	docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool
+				ECODE=$?
+				;;
+esac
+
 exit $ECODE

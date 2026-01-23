@@ -31,7 +31,8 @@ RUN apt-get update && \
 
 # Install Jupyter and other python deps
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip3 install --upgrade pip && \
+	pip3 install -r requirements.txt
 
 # Add scala kernel via spylon-kernel
 RUN python3 -m spylon_kernel install
@@ -42,13 +43,13 @@ ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip:$
 
 WORKDIR ${SPARK_HOME}
 
-ENV SPARK_VERSION=3.5.7
+ENV SPARK_VERSION=3.5.8
 ENV SPARK_MAJOR_VERSION=3.5
 ENV ICEBERG_VERSION=1.10.1
 
 # Download spark
 RUN mkdir -p ${SPARK_HOME} \
- && curl https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz -o spark-${SPARK_VERSION}-bin-hadoop3.tgz \
+ && curl https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz -o spark-${SPARK_VERSION}-bin-hadoop3.tgz \
  && tar xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz --directory /opt/spark --strip-components 1 \
  && rm -rf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 

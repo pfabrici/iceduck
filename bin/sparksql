@@ -1,0 +1,24 @@
+#!/bin/bash
+set -ao pipefail
+
+source ./etc/iceduck.env
+. ./bin/icelib.sh
+ECODE=0
+
+_parseargs "$@"
+
+case ${EXEC} in
+	"file") 	cat $FNAME | \
+                    docker exec -i iceduck_spark spark-sql --master="spark://spark:7077" ${CLIOPTS}
+				ECODE=$?
+				;;
+	"clicmd")	echo "${CLICMD}" | \
+                    docker exec -i iceduck_spark spark-sql --master="spark://spark:7077" ${CLIOPTS}
+				ECODE=$?
+				;;
+	"shell") 	docker exec -it iceduck_spark spark-sql --master="spark://spark:7077" ${CLIOPTS}
+				ECODE=$?
+				;;
+esac
+
+exit $ECODE

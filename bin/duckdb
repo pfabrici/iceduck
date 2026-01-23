@@ -1,0 +1,24 @@
+#!/bin/bash
+set -ao pipefail
+
+source ./etc/iceduck.env
+. ./bin/icelib.sh
+ECODE=0
+
+_parseargs "$@"
+
+case ${EXEC} in
+	"file") 	cat $FNAME | \
+	                docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env -v "./files/data/duckdb/workspace:/workspace" -w /workspace duckdb/duckdb ${CLIOPTS}
+				ECODE=$?
+				;;
+	"clicmd")	echo "${CLICMD}" | \
+	                docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env -v "./files/data/duckdb/workspace:/workspace" -w /workspace duckdb/duckdb ${CLIOPTS}
+				ECODE=$?
+				;;
+	"shell") 	docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env -v "./files/data/duckdb/workspace:/workspace" -w /workspace duckdb/duckdb ${CLIOPTS}
+				ECODE=$?
+				;;
+esac
+
+exit $ECODE

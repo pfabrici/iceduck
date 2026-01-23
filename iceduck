@@ -1,5 +1,17 @@
 #!/bin/bash
 
+_prep_folders() {
+        mkdir -p ./files/data/mc \
+        ./files/data/postgres/data \
+        ./files/data/minio \
+        ./files/data/trino/data \
+        ./files/data/trino/etc/catalog \
+        ./files/data/spark/config \
+        ./files/data/spark/warehouse \
+        ./files/data/spark/notebooks \
+        ./files/data/duckdb/workspace
+}
+
 START_DIR=$PWD
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
@@ -9,6 +21,10 @@ source ./etc/iceduck.env
 
 case $1 in
     init)   echo "Initializing"
+
+            echo "----- Datenverzeichnisse anlegen"
+            _prep_folders 
+            [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- Trino config schreiben"
             ./files/init/prep_trino.sh
@@ -27,11 +43,11 @@ case $1 in
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- bootstrap Polaris"
-            bin/poladm bootstrap -r ${POLARIS_REALM} -c "${POLARIS_REALM},${POLARIS_ROOT_CLIENT_ID},${POLARIS_ROOT_CLIENT_SECRET}" --print-credentials
+            bin/poladm -c "bootstrap -r \${POLARIS_REALM} -c \${POLARIS_REALM},\${POLARIS_ROOT_CLIENT_ID},\${POLARIS_ROOT_CLIENT_SECRET} --print-credentials"
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- configure Polaris"
-            bin/iceshell ./files/init/prep_polaris.sh
+            bin/iceshell -f ./files/init/prep_polaris.sh
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             ;;
@@ -42,18 +58,11 @@ case $1 in
             sudo rm -rf ./files/data/*
             [ $? -ne 0 ] && { ECODE=10; break; }
 
-            mkdir -p ./files/data/mc \
-                ./files/data/postgres/data \
-                ./files/data/minio \
-                ./files/data/trino/data \
-                ./files/data/trino/etc/catalog \
-                ./files/data/spark/config \
-                ./files/data/spark/warehouse \
-                ./files/data/spark/notebooks \
+            _prep_folders
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             ;;
-    start)   docker compose up -d 
+    start)  docker compose up -d 
             [ $? -ne 0 ] && { ECODE=10; break; }
             ;;
     stop)   docker compose down 

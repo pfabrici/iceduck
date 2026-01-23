@@ -1,20 +1,39 @@
 #!/bin/bash
+set -ao pipefail
 
-set -a -o pipefail
 source ./etc/iceduck.env
+. ./bin/icelib.sh
+ECODE=0
 
-if [ $# -ne 0 ] ; then
-	FNAME=$1
-	shift
-	DOCKEROPTS=${*:- -U postgres}
-fi
+_parseargs "$@"
 
-if [ "X${FNAME}" != "X" ] ; then
-	cat $FNAME | docker exec -i iceduck_db psql ${DOCKEROPTS}
-	ECODE=$?
-else
-	docker exec -it iceduck_db psql -U postgres 
-	ECODE=$?
-fi
+# check if the username parameter is given in 
+# CLIOPTS, otherwise add it
+echo "${CLIOPTS}" | grep -e "-U" 2>&1 >/dev/null
+[ $? -ne 0 ] && CLIOPTS="${CLIOPTS} -U postgres"
+
+PSQLENVFILE=/tmp/psql$$.tmp
+
+case ${EXEC} in
+	"file") 	grep -e "AWS\|MINIO\|POLARIS\|SPARK" etc/iceduck.env | sed -e 's!\(.*\)=\(.*\)!\\set \1 \2 !g' > $PSQLENVFILE
+				cat $PSQLENVFILE $FNAME | docker exec -i iceduck_db psql ${CLIOPTS}
+				ECODE=$?
+				[ -e $PSQLENVFILE ] && rm $PSQLENVFILE
+				;;
+	"clicmd")	grep -e "AWS\|MINIO\|POLARIS\|SPARK" etc/iceduck.env | sed -e 's!\(.*\)=\(.*\)!\\set \1 \2 !g' > $PSQLENVFILE
+				echo "${CLICMD}" | cat $PSQLENVFILE - | docker exec -i iceduck_db psql ${CLIOPTS} 
+				ECODE=$?
+				[ -e $PSQLENVFILE ] && rm $PSQLENVFILE
+				;;
+	"shell") 	grep -e "AWS\|MINIO\|POLARIS\|SPARK" etc/iceduck.env | grep -v "^$" | grep -v "^#"  > $PSQLENVFILE
+				while read V ; do
+					[ ! -z $V ] && PARAMSTR="$PARAMSTR -v $V"
+				done < $PSQLENVFILE
+				docker exec -it iceduck_db psql -U postgres ${PARAMSTR} ${CLIOPTS} 
+				ECODE=$?
+				[ -e $PSQLENVFILE ] && rm $PSQLENVFILE
+				;;
+	*)			;;
+esac
 
 exit $ECODE

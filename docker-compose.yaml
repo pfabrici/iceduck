@@ -98,7 +98,7 @@ services:
       - ./files/data/spark/config/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./files/data/spark/config/pyiceberg.yaml:/root/.pyiceberg.yaml
       - ./files/data/spark/warehouse:/home/iceberg/warehouse
-      - ./files/data/spark/notebooks:/home/iceberg/notebooks/notebooks
+      - ./files/scripts/jupyter:/home/iceberg/notebooks
     env_file: "./etc/iceduck.env"
     ports:
       - ${SPARK_JUPYTER_PORT}:8888

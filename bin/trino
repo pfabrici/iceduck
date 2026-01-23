@@ -1,20 +1,24 @@
 #!/bin/bash
+set -ao pipefail
 
-set -a -o pipefail
 source ./etc/iceduck.env
+. ./bin/icelib.sh
+ECODE=0
 
-if [ $# -ne 0 ] ; then
-	FNAME=$1
-	shift
-	DOCKEROPTS=${*:- -U postgres}
-fi
+_parseargs "$@"
 
-if [ "X${FNAME}" != "X" ] ; then
-	cat $FNAME | docker exec -i iceduck_trino trino ${DOCKEROPTS}
-	ECODE=$?
-else
-	docker exec -it iceduck_trino trino
-	ECODE=$?
-fi
+case ${EXEC} in
+	"file") 	cat $FNAME | \
+					docker exec -i iceduck_trino trino ${CLIOPTS}
+				ECODE=$?
+				;;
+	"clicmd")	echo "${CLICMD}" | \
+					docker exec -i iceduck_trino trino ${CLIOPTS}
+				ECODE=$?
+				;;
+	"shell") 	docker exec -it iceduck_trino trino ${CLIOPTS}
+				ECODE=$?
+				;;
+esac
 
 exit $ECODE

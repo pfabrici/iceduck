@@ -27,7 +27,14 @@ FNAME=files/data/spark/config/pyiceberg.yaml
 
 echo "catalog:" > $FNAME
 echo "  default:" >> $FNAME
+echo "      type: rest" >> $FNAME
 echo "      uri: http://rest:8181/api/catalog/" >> $FNAME
+echo "      header.X-Iceberg-Access-Delegation: vended-credentials" >> $FNAME
+echo "      credential: ${POLARIS_ROOT_CLIENT_ID}:${POLARIS_ROOT_CLIENT_SECRET}" >> $FNAME
+echo "      warehouse: ${POLARIS_CATALOG_NAME}" >> $FNAME
+echo "      scope: PRINCIPAL_ROLE:ALL" >> $FNAME
+echo "      token-refresh-enabled: true" >> $FNAME
+echo "      py-io-impl: pyiceberg.io.fsspec.FsspecFileIO" >> $FNAME
 echo "      s3.endpoint: http://minio:9000" >> $FNAME
 echo "      s3.access-key-id: ${AWS_ACCESS_KEY_ID}" >> $FNAME
 echo "      s3.secret-access-key: ${AWS_SECRET_ACCESS_KEY}" >> $FNAME
