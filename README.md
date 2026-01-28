@@ -78,6 +78,6 @@ See the running spark jobs at (http://localhost:8080)
 
 
 ## References
-https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
-https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml
-https://duckdb.org/docs/stable/core_extensions/postgres
+* https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98
+* https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml
+* https://duckdb.org/docs/stable/core_extensions/postgres

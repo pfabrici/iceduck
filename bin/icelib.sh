@@ -1,9 +1,23 @@
 _usage() {
-	exit 2
+	ECODE=$1
+
+	echo "Parameter :"
+	"	-f <Filename> : executes the contents of <Filename> "
+	" 	-c '<command>' :  executes the single command that ios given in the parameter."
+	"                   <command> should be put in brackets"
+	"                   Can not be combined with -f"
+
+	case "$ECODE" in
+		0)	echo "Show help" ;;
+		11)	echo "Error: File $FNAME does not exit" ;;
+		*) echo "Unknown error code" ;;
+	esac
+
+	exit $ECODE
 }
 
 _parseargs() {
-	ARGS=$(getopt -o f:c:o: --long file:,command:,opts: -- "$@")
+	ARGS=$(getopt -o hf:c:o: --long file:,command:,opts: -- "$@")
 	[ $? -ne 0 ] && _usage
 	POS=0
 
@@ -16,13 +30,13 @@ _parseargs() {
 		pyspark|sparksql|trino)	if [ $POS -eq 1 ] ; then 
 									APP=$1
 								else
-									_usage
+									_usage 10
 								fi
 								shift
 								;;
 		-f | --filename)   	EXEC="file"
 							FNAME="$2"
-							[ ! -f $FNAME ] && { ECODE=10; _usage; }
+							[ ! -f $FNAME ] && { ECODE=11; _usage; }
 							shift  
 							;;
 		-c | --command)     EXEC="clicmd"
@@ -33,6 +47,7 @@ _parseargs() {
 		-o | --opts) 		CLIOPTS="${CLIOPTS} $2"
 							shift; 
 							break ;;
+		-h | --help)		_usage 0 ;;
 		--) shift; break ;;
 		*) shift; break ;;
 	esac
