@@ -12,3 +12,4 @@ s3fs==2026.1.0
 protobuf
 grpcio-status
 ipynbname
+dlt[duckdb,postgres,pyiceberg]

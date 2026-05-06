@@ -1,2 +1,3 @@
 files/data/**/*
 scripts/hop/iceduck.db
+files/scripts/jupyter/.ipynb_checkpoints/*

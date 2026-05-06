@@ -51,6 +51,9 @@ case $1 in
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             ;;
+    build)  docker compose build
+            [ $? -ne 0 ] && { ECODE=10; break; }
+            ;;
     clean)
             docker compose down
             [ $? -ne 0 ] && { ECODE=10; break; }
@@ -62,7 +65,7 @@ case $1 in
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             ;;
-    start)  docker compose up -d 
+    start)  docker compose up -d  
             [ $? -ne 0 ] && { ECODE=10; break; }
             ;;
     stop)   docker compose down 
