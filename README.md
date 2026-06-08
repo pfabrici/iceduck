@@ -16,6 +16,9 @@ There has been a lot of input coming from other repositories and articles. See t
 
 IceDuck got its name, because the original intention was to explore the DuckDB capabilties in combination with Apache Iceberg tables. On the way Trino, Jupyter, Spark etc. were added but the name stayed.
 
+## License
+![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+
 ## Usage
 ### Requirements
 The software stack is implemented as a docker compose stack and should run on any Docker platform. The wrapper scripts are all Linux bash, so a Linux box is the preferred home of Iceduck.
