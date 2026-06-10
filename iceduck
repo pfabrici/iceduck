@@ -9,7 +9,7 @@ _prep_folders() {
         ./files/data/spark/config \
         ./files/data/spark/warehouse \
         ./files/data/spark/notebooks \
-        ./files/data/duckdb/workspace
+        ./files/data/duckdb/workspace/init
 }
 
 START_DIR=$PWD
@@ -32,6 +32,10 @@ case $1 in
 
             echo "----- configure Spark"
             ./files/init/prep_spark.sh
+            [ $? -ne 0 ] && { ECODE=10; break; }
+
+            echo "----- configure DuckDB"
+            ./files/init/prep_duckdb.sh
             [ $? -ne 0 ] && { ECODE=10; break; }
 
             echo "----- Stack starten"

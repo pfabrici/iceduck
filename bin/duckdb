@@ -5,6 +5,8 @@ source ./etc/iceduck.env
 . ./bin/icelib.sh
 ECODE=0
 
+
+CLIOPTS="duckdb -init init/init.sql iceduck.duckdb"
 _parseargs "$@"
 
 case ${EXEC} in
