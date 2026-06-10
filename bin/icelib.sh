@@ -2,10 +2,10 @@ _usage() {
 	ECODE=$1
 
 	echo "Parameter :"
-	"	-f <Filename> : executes the contents of <Filename> "
-	" 	-c '<command>' :  executes the single command that ios given in the parameter."
-	"                   <command> should be put in brackets"
-	"                   Can not be combined with -f"
+	echo "	-f <Filename> : executes the contents of <Filename> "
+	echo " 	-c '<command>' :  executes the single command that ios given in the parameter."
+	echo "                   <command> should be put in brackets"
+	echo "                   Can not be combined with -f"
 
 	case "$ECODE" in
 		0)	echo "Show help" ;;

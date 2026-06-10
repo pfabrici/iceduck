@@ -2,7 +2,7 @@
 BASE_URL="http://iceduck_polaris:${POLARIS_API_PORT}/api"
 
 set -x
-sleep 10
+sleep 15
 
 ACCESS_TOKEN=$(curl -X POST \
   ${BASE_URL}/catalog/v1/oauth/tokens \

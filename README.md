@@ -27,6 +27,8 @@ It provides a **Docker Compose-based environment** with:
 > **💡 Why "Iceduck"?**
 > The project started as an exploration of **DuckDB + Apache Iceberg** capabilities. Along the way, Trino, Spark, Jupyter, and other tools were added—but the name stuck!
 
+Find more Iceduck tutorials in the Tutorials section of this README.md or in the doc folder of the repository.
+
 ---
 
 ## 🔥 **Why Use Iceduck?**
@@ -139,6 +141,9 @@ iceduck/
 ├── LICENSE            # Apache 2.0 License
 └── README.md          # This file
 ```
+
+## Iceduck Tutorials
+* [Using the DuckDB CLI](doc/Using_DuckDB_CLI.md)
 
 ---
 

@@ -12,6 +12,13 @@ _prep_folders() {
         ./files/data/duckdb/workspace/init
 }
 
+_abort() {
+        ERRORCODE=$1
+
+        echo "Script ended unsuccessfull with $ERRORCODE"
+        exit $ERRORCODE
+}
+
 START_DIR=$PWD
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
@@ -24,59 +31,59 @@ case $1 in
 
             echo "----- Datenverzeichnisse anlegen"
             _prep_folders 
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- Trino config schreiben"
             ./files/init/prep_trino.sh
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- configure Spark"
             ./files/init/prep_spark.sh
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- configure DuckDB"
             ./files/init/prep_duckdb.sh
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- Stack starten"
             docker compose up -d
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- Bucket im Minio anlegen"
             bin/mc -f ./files/init/prep_minio.sh
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- bootstrap Polaris"
             bin/poladm -c "bootstrap -r \${POLARIS_REALM} -c \${POLARIS_REALM},\${POLARIS_ROOT_CLIENT_ID},\${POLARIS_ROOT_CLIENT_SECRET} --print-credentials"
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- configure Polaris"
             bin/iceshell -f ./files/init/prep_polaris.sh
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             ;;
     build)  docker compose build
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
             ;;
     clean)
             docker compose down
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             sudo rm -rf ./files/data/*
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             _prep_folders
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
 
             ;;
     start)  docker compose up -d  
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
             ;;
     stop)   docker compose down 
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
             ;;
     restart)   docker compose down && docker compose up -d 
-            [ $? -ne 0 ] && { ECODE=10; break; }
+            [ $? -ne 0 ] && { _abort 10; }
             ;;
     *)      ;;
 esac    
