@@ -151,7 +151,6 @@ This project is licensed under the **Apache License 2.0** – see the [LICENSE](
 We welcome contributions! Here’s how you can help:
 - **Report bugs or request features:** [Open an Issue](https://github.com/pfabrici/iceduck/issues)
 - **Submit a pull request:** [Pull Requests](https://github.com/pfabrici/iceduck/pulls)
-- **Discuss ideas:** [Discussions](https://github.com/pfabrici/iceduck/discussions) (if enabled)
 
 > **⭐ Support the Project**
 > If you find Iceduck useful, **star this repo** and share it with others!
