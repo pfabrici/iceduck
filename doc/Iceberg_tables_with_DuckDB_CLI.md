@@ -1,4 +1,4 @@
-# Using the DuckDB CLI
+# Handle Iceberg DataLakehouse tables with DuckDB CLI
 ## Introduction
 
 DuckDB is an excellent frontend for interacting with **Apache Iceberg** tables organized using **Apache Polaris**. It allows you to run simple SQL statements to manage database objects and their content.
@@ -67,7 +67,7 @@ Depending on the the secret type ( s3 or iceberg ) different variables need to b
 
 You can run the secret generation by executing : 
 ```shell
-bin/duckdb -f fiels/scripts/duckdb/01_create_secrets.sql 
+bin/duckdb -f files/scripts/duckdb/01_prepare.sql 
 ```
 from iceducks home folder. The wrapper takes care of setting the correct environment variables that are used in the SQL statements.
 
@@ -110,5 +110,7 @@ bin/duckdb -f files/scripts/duckdb/02_create_objects.sql
 ```
 to create schema and table. Afterwards you can check the creation of the empty table in the [MinIO console](http://localhost:9001/browser/warehouse/iceduck)
 
+## Limits
 
+Keep in mind that you can only run common SQL statements on the Iceberg tables from the DuckDB CLI. It is not possible to execute specific tag, branch or file query operations.
 

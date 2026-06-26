@@ -1,4 +1,8 @@
-
+--
+-- to connect DuckDB to an Iceberg DataLakehouse
+-- it is necessary to define the credentials 
+-- e.g. by defining secrets
+--
 CREATE PERSISTENT SECRET s3_secret( 
     TYPE s3, 
     KEY_ID getenv('AWS_ACCESS_KEY_ID'), 
@@ -16,5 +20,9 @@ CREATE PERSISTENT SECRET polaris_secret(
     ENDPOINT 'http://rest:8181/api/catalog' 
 );
 
+--
+--  ATTACH uses the secretes to connect the DL catalog
+-- so DuckDB can manage SQL on DL objects
+--
 ATTACH 'polariscatalog' AS warehouse (  TYPE ICEBERG , ACCESS_DELEGATION_MODE none );
 
