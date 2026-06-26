@@ -12,7 +12,7 @@
 
 ---
 
-## 📌 **What is Iceduck?**
+## **What is Iceduck?**
 **Iceduck** is an **open-source Data Lakehouse stack** designed for **learning, prototyping, and testing** modern data architectures **locally**—without cloud dependencies or proprietary SaaS solutions.
 
 It provides a **Docker Compose-based environment** with:
@@ -24,35 +24,31 @@ It provides a **Docker Compose-based environment** with:
 - **DuckDB** for **fast analytical queries** on Iceberg tables
 - **Jupyter Notebooks** for **interactive exploration** with Spark and Python
 
-> **💡 Why "Iceduck"?**
-> The project started as an exploration of **DuckDB + Apache Iceberg** capabilities. Along the way, Trino, Spark, Jupyter, and other tools were added—but the name stuck!
-
-Find more Iceduck tutorials in the Tutorials section of this README.md or in the doc folder of the repository.
-
 ---
 
-## 🔥 **Why Use Iceduck?**
+## **Why Use Iceduck?**
 Data Lakes and Data Lakehouses are **replacing traditional data warehouses** for modern analytics, but most infrastructure solutions are **proprietary or cloud-locked** (e.g., Databricks, Snowflake, or AWS/GCP services). This makes it **difficult to learn the core open-source technologies** behind these systems—such as **Apache Iceberg, Trino, or MinIO**—without vendor dependencies.
 
-### **Key Challenges Addressed by Iceduck:**
-| Problem | Solution |
-|---------|----------|
-| **Cost Barriers** | Runs **locally at zero cost** (no cloud fees) |
-| **Vendor Lock-in** | Uses **open standards** (Apache Iceberg, REST catalogs) |
-| **Learning Curve** | **Full control** over configurations and integrations |
-| **Innovation Speed** | Test **bleeding-edge features** without waiting for cloud providers |
+The project started as an exploration of **DuckDB + Apache Iceberg** capabilities. Along the way, Trino, Spark, Jupyter, and other tools were added—but the name stuck!
+Find more Iceduck tutorials in the Tutorials section of this README.md or in the doc folder of the repository.
 
-> *"Iceduck lets you explore Data Lakehouse concepts **without the cloud complexity**—perfect for developers, data engineers, and curious learners."*
-
-**📚 Learn More:**
+Insiprations for this repo were found here :
+- [IcebergLakeHouse](https://iceberglakehouse.com/)
 - [Why Open Table Formats Matter (Apache Iceberg)](https://iceberg.apache.org/docs/latest/why-iceberg/)
 - [Data Lakehouse vs. Data Warehouse (Databricks)](https://www.databricks.com/glossary/what-is-a-data-lakehouse)
 - [Build a Data Lakehouse with Iceberg, Polaris, Trino, MinIO (Medium)](https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98)
+- [Databricks Docker Spark Iceberg](https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml)
+- [DuckDB Postgres Extension](https://duckdb.org/docs/stable/core_extensions/postgres)
+- [Apache Iceberg Documentation](https://iceberg.apache.org/docs/latest/)
+- [Trino Documentation](https://trino.io/docs/current/)
+
+Tutorials, Results and documentation of my investigations with Iceduck.
+* [Using the DuckDB CLI](doc/Using_DuckDB_CLI.md)
 
 ---
 
-## 🚀 **Quickstart**
-Iceduck is designed to be **as easy as running a single script**. Here’s how to get started:
+## **Quickstart**
+Iceduck is designed to be as easy as running a single script. Here’s how to get started:
 
 ### **Prerequisites**
 - **Docker** + **Docker Compose** (tested with Docker 24+ and Compose v2+)
@@ -81,13 +77,13 @@ cd iceduck
 
 ---
 
-## 🔌 **Accessing Services**
+## **Accessing Services**
 Once the stack is running, you can access the following services:
 
 | Service | URL | Credentials | Wrapper Script |
 |---------|-----|-------------|----------------|
 | **MinIO Web UI** | [http://localhost:9001](http://localhost:9001) | `admin` / `password` | `bin/mc` |
-| **Trino Web UI** | [http://localhost:8060](http://localhost:8060) | - | `bin/trino` |
+| **Trino Web UI** | [http://localhost:8060](http://localhost:8060) | `admin` | `bin/trino` |
 | **Jupyter Notebooks** | [http://localhost:8888](http://localhost:8888) | - | - |
 | **Spark UI** | [http://localhost:8080](http://localhost:8080) | - | - |
 | **Postgres** | `localhost:5432` | `postgres` / `password` | `bin/psql` |
@@ -130,29 +126,12 @@ Once the stack is running, you can access the following services:
 
 ---
 
-## 📂 **Project Structure**
-```
-iceduck/
-├── bin/               # Wrapper scripts (mc, trino, psql, iceshell, poladm)
-├── etc/               # Configuration files (e.g., iceduck.env)
-├── files/             # Additional files (e.g., Spark configs)
-├── docker-compose.yaml # Docker Compose setup
-├── iceduck            # Main wrapper script (start/stop/clean/init)
-├── LICENSE            # Apache 2.0 License
-└── README.md          # This file
-```
-
-## Iceduck Tutorials
-* [Using the DuckDB CLI](doc/Using_DuckDB_CLI.md)
-
----
-
-## 📜 **License**
+## **License**
 This project is licensed under the **Apache License 2.0** – see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🤝 **Contributing**
+## **Contributing**
 We welcome contributions! Here’s how you can help:
 - **Report bugs or request features:** [Open an Issue](https://github.com/pfabrici/iceduck/issues)
 - **Submit a pull request:** [Pull Requests](https://github.com/pfabrici/iceduck/pulls)
@@ -161,13 +140,5 @@ We welcome contributions! Here’s how you can help:
 > If you find Iceduck useful, **star this repo** and share it with others!
 
 ---
-## 📚 **References & Inspirations**
-- [Build a Data Lakehouse with Apache Iceberg, Polaris, Trino, MinIO (Medium)](https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98)
-- [Databricks Docker Spark Iceberg](https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml)
-- [DuckDB Postgres Extension](https://duckdb.org/docs/stable/core_extensions/postgres)
-- [Apache Iceberg Documentation](https://iceberg.apache.org/docs/latest/)
-- [Trino Documentation](https://trino.io/docs/current/)
-
----
-## 📧 **Contact**
+## **Contact**
 - **GitHub:** [@pfabrici](https://github.com/pfabrici)
