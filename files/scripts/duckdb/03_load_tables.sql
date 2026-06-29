@@ -4,4 +4,5 @@ ATTACH 'polariscatalog' AS warehouse (  TYPE ICEBERG , ACCESS_DELEGATION_MODE no
 INSERT INTO warehouse.iceduck.visitors 
 SELECT now(), 'DuckDB', 'created with the DuckDB CLI' FROM range(1,1000000);
 
-SELECT count(*) FROM warehouse.iceduck.visitors ORDER BY 1 DESC;
+SELECT count(*) FROM warehouse.iceduck.visitors;
+
