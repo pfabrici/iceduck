@@ -1,9 +1,23 @@
+#!/bin/sh
 
 BASE_URL="http://iceduck_polaris:${POLARIS_API_PORT}/api"
+MGMT_URL="http://iceduck_polaris:${POLARIS_MGMT_PORT}"
 
-set -x
-sleep 15
+#
+#	wait max 1 Minute until Polaris is available
+#
+HEALTHCNT=0
+while true ; do
+	HEALTH=$( curl -X GET ${MGMT_URL}/q/health 2>/dev/null | jq -r ".status" )
+	[ "X${HEALTH}" == "XUP" ] && break
+	sleep 2
+	HEALTHCNT=$(( HEALTHCNT + 1))
+	[ ${HEALTHCNT} -eq 30 ] && { echo "Polaris not available"; exit 42; }
+done
 
+#
+#	acquire an access token for the next steps
+#
 ACCESS_TOKEN=$(curl -X POST \
   ${BASE_URL}/catalog/v1/oauth/tokens \
   -d 'grant_type=client_credentials&client_id='${POLARIS_ROOT_CLIENT_ID}'&client_secret='${POLARIS_ROOT_CLIENT_SECRET}'&scope=PRINCIPAL_ROLE:ALL' \
@@ -12,7 +26,9 @@ ACCESS_TOKEN=$(curl -X POST \
 
 [ -z ${ACCESS_TOKEN} ] && exit 10
 
+#
 # Create a catalog
+#
 curl -i -X POST \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   ${BASE_URL}/management/v1/catalogs \
