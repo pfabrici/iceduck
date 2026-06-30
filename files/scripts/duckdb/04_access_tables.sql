@@ -26,5 +26,8 @@ SELECT count(*) FROM warehouse.iceduck.visitors;
 -- compose the table which is given by the path in the parameter :
 --
 SELECT * FROM iceberg_metadata('s3://warehouse/iceduck/visitors');
+
+-- with iceberg_snapshots it is possible to query all available
+-- snapshots of a certain table
 SELECT * FROM iceberg_snapshots('s3://warehouse/iceduck/visitors');
 

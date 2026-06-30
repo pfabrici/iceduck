@@ -8,6 +8,3 @@ CREATE TABLE IF NOT EXISTS visitors (
     visitor         VARCHAR(20),
     description     VARCHAR(50)
 );
-
-INSERT INTO warehouse.iceduck.visitors VALUES ( now(), 'Trino', 'created with the Trino CLI' );
-SELECT * FROM warehouse.iceduck.visitors ORDER BY 1 DESC;

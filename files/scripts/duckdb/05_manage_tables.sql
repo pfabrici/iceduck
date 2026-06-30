@@ -1,0 +1,3 @@
+--
+--  DuckDB does not offer table management functions
+--

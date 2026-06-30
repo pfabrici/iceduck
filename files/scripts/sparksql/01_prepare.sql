@@ -1,0 +1,5 @@
+--
+-- no preparation of the session needed for SparkSQL
+-- connectivity is defined in the Spark configs at 
+-- files/data/spark/config/spark-defaults.conf
+--
