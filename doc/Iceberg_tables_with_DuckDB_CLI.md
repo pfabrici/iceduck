@@ -7,8 +7,7 @@ This guide explains how to set up this basic interaction in **Iceduck** and perf
 
 
 ## Requirements
-
-To follow this guide, ensure the **Iceduck** environment is installed on your local system. Refer to the [setup guide](https://github.com/pfabrici/iceduck/blob/main/README.md) for detailed instructions.
+To follow this guide, ensure the **Iceduck** environment is installed on your local system. Refer to the [setup guide](https://github.com/pfabrici/iceduck/README.md) for detailed instructions.
 
 
 ## The CLI wrapper

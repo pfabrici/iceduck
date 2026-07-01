@@ -36,7 +36,7 @@ Tutorials, Results and documentation of my investigations with Iceduck.
 ## **How to use this Data Lakehouse**
 This platform was originally used to explore the capabilities of a Data Lakehouse. You can find the write-ups of the findings in the doc section. Here are some links to further readings :
 
-* [Using the DuckDB CLI](doc/Using_DuckDB_CLI.md)
+* [Using the DuckDB CLI](doc/Iceberg_tables_with_DuckDB_CLI.md)
 
 ---
 
