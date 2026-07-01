@@ -37,6 +37,7 @@ Tutorials, Results and documentation of my investigations with Iceduck.
 This platform was originally used to explore the capabilities of a Data Lakehouse. You can find the write-ups of the findings in the doc section. Here are some links to further readings :
 
 * [Using the DuckDB CLI](doc/Iceberg_tables_with_DuckDB_CLI.md)
+* [Populating the Data Lakehouse with Apache Hop](doc/Populate_DataLakehouse_with_Apache_Hop.md)
 
 ---
 
