@@ -37,7 +37,7 @@ curl -i -X POST \
     "type": "INTERNAL",
     "properties": {
       "default-base-location": "s3://'${MINIO_BUCKETNAME}'",
-      "s3.endpoint": "http://minio:9000",
+      "s3.endpoint": "'${AWS_ENDPOINT_URL_S3}'",
       "s3.path-style-access": "true",
       "s3.access-key-id": "'${AWS_ACCESS_KEY_ID}'",
       "s3.secret-access-key": "'${AWS_SECRET_ACCESS_KEY}'",
