@@ -45,8 +45,15 @@ case $1 in
             ./files/init/prep_duckdb.sh
             [ $? -ne 0 ] && { _abort 10; }
 
+            echo "----- prepare the Docker network"
+            docker network inspect iceduck_net 2>&1 >/dev/null
+            [ $? -ne 0 ] && {
+                 docker network create -d bridge iceduck_net
+                 [ $? -ne 0 ] && { _abort 10; }
+	    }
+
             echo "----- Stack starten"
-            docker compose up -d
+            docker compose -f files/docker/docker-compose.yaml up -d
             [ $? -ne 0 ] && { _abort 10; }
 
             echo "----- Bucket im Minio anlegen"
@@ -62,12 +69,19 @@ case $1 in
             [ $? -ne 0 ] && { _abort 10; }
 
             ;;
-    build)  docker compose build
+    build)  docker compose -f files/docker/docker-compose.yaml build
             [ $? -ne 0 ] && { _abort 10; }
             ;;
     clean)
-            docker compose down
+            docker compose -f files/docker/docker-compose.yaml down
             [ $? -ne 0 ] && { _abort 10; }
+
+            echo "----- prepare the Docker network"
+            docker network inspect iceduck_net 2>&1 >/dev/null
+            [ $? -eq 0 ] && {
+	    	docker network rm iceduck_net
+            	[ $? -ne 0 ] && { _abort 10; }
+	    }
 
             sudo rm -rf ./files/data/*
             [ $? -ne 0 ] && { _abort 10; }
@@ -76,13 +90,13 @@ case $1 in
             [ $? -ne 0 ] && { _abort 10; }
 
             ;;
-    start)  docker compose up -d  
+    start)  docker compose -f files/docker/docker-compose.yaml up -d  
             [ $? -ne 0 ] && { _abort 10; }
             ;;
-    stop)   docker compose down 
+    stop)   docker compose -f files/docker/docker-compose.yaml down
             [ $? -ne 0 ] && { _abort 10; }
             ;;
-    restart)   docker compose down && docker compose up -d 
+    restart)   docker compose -f files/docker/docker-compose.yaml down && docker compose -f files/docker/docker-compose.yaml up -d 
             [ $? -ne 0 ] && { _abort 10; }
             ;;
     *)      ;;

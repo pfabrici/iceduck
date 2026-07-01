@@ -9,11 +9,11 @@ _parseargs "$@"
 
 case ${EXEC} in
 	"file") 	cat $FNAME | \
-					docker exec -i iceduck_trino trino ${CLIOPTS}
+				docker exec -i iceduck_trino trino ${CLIOPTS}
 				ECODE=$?
 				;;
 	"clicmd")	echo "${CLICMD}" | \
-					docker exec -i iceduck_trino trino ${CLIOPTS}
+				docker exec -i iceduck_trino trino ${CLIOPTS}
 				ECODE=$?
 				;;
 	"shell") 	docker exec -it iceduck_trino trino ${CLIOPTS}

@@ -8,7 +8,7 @@ _usage() {
 
 source ./etc/iceduck.env
 
-DOCKEROPTS="--network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/bash  -v ./files/data/mc:/root/.mc  minio/mc:RELEASE.2025-04-16T18-13-26Z "
+DOCKEROPTS="--network iceduck_net --env-file ./etc/iceduck.env --entrypoint /bin/bash  -v ./files/data/mc:/root/.mc  minio/mc:RELEASE.2025-04-16T18-13-26Z "
 unset EXEC FNAME CMD
 ECODE=0
 

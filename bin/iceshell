@@ -9,14 +9,14 @@ _parseargs "$@"
 
 case ${EXEC} in
 	"file") 	cat $FNAME | \
-					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+				docker run --rm -i --network iceduck_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck_shell ${CLIOPTS}
 				ECODE=$?
 				;;
 	"clicmd")	echo "${CLICMD}" | \
-					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+				docker run --rm -i --network iceduck_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck_shell ${CLIOPTS}
 				ECODE=$?
 				;;
-	"shell") 	docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck-curlshell ${CLIOPTS}
+	"shell") 	docker run --rm -it --network iceduck_net --env-file ./etc/iceduck.env --entrypoint /bin/sh  iceduck_shell ${CLIOPTS}
 				ECODE=$?
 				;;
 esac

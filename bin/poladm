@@ -9,14 +9,14 @@ _parseargs "$@"
 
 case ${EXEC} in
 	"file") 	cat $FNAME | \
-					docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env -entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
+				docker run --rm -i --network iceduck_net --env-file ./etc/iceduck.env -entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
 				ECODE=$?
 				;;
 	"clicmd")	echo "java -jar polaris-admin-tool.jar ${CLICMD}" | \
-				docker run --rm -i --network iceduck_iceberg_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
+				docker run --rm -i --network iceduck_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool 
 				ECODE=$?
 				;;
-	"shell") 	docker run --rm -it --network iceduck_iceberg_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool
+	"shell") 	docker run --rm -it --network iceduck_net --env-file ./etc/iceduck.env  --entrypoint /bin/bash -w /deployments apache/polaris-admin-tool
 				ECODE=$?
 				;;
 esac
