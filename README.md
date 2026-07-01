@@ -30,99 +30,104 @@ It provides a **Docker Compose-based environment** with:
 Data Lakes and Data Lakehouses are **replacing traditional data warehouses** for modern analytics, but most infrastructure solutions are **proprietary or cloud-locked** (e.g., Databricks, Snowflake, or AWS/GCP services). This makes it **difficult to learn the core open-source technologies** behind these systems—such as **Apache Iceberg, Trino, or MinIO**—without vendor dependencies.
 
 The project started as an exploration of **DuckDB + Apache Iceberg** capabilities. Along the way, Trino, Spark, Jupyter, and other tools were added—but the name stuck!
-Find more Iceduck tutorials in the Tutorials section of this README.md or in the doc folder of the repository.
-
-Insiprations for this repo were found here :
-- [IcebergLakeHouse](https://iceberglakehouse.com/)
-- [Why Open Table Formats Matter (Apache Iceberg)](https://iceberg.apache.org/docs/latest/why-iceberg/)
-- [Data Lakehouse vs. Data Warehouse (Databricks)](https://www.databricks.com/glossary/what-is-a-data-lakehouse)
-- [Build a Data Lakehouse with Iceberg, Polaris, Trino, MinIO (Medium)](https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98)
-- [Databricks Docker Spark Iceberg](https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml)
-- [DuckDB Postgres Extension](https://duckdb.org/docs/stable/core_extensions/postgres)
-- [Apache Iceberg Documentation](https://iceberg.apache.org/docs/latest/)
-- [Trino Documentation](https://trino.io/docs/current/)
 
 Tutorials, Results and documentation of my investigations with Iceduck.
+
+## **How to use this Data Lakehouse**
+This platform was originally used to explore the capabilities of a Data Lakehouse. You can find the write-ups of the findings in the doc section. Here are some links to further readings :
+
 * [Using the DuckDB CLI](doc/Using_DuckDB_CLI.md)
 
 ---
 
 ## **Quickstart**
-Iceduck is designed to be as easy as running a single script. Here’s how to get started:
+Iceduck is designed to be as easy as running a single script with some command options. Here’s how to get started:
 
 ### **Prerequisites**
 - **Docker** + **Docker Compose** (tested with Docker 24+ and Compose v2+)
 - **Linux/Unix environment** (wrapper scripts are Bash-based)
 - **Git** (to clone the repository)
 
-### **1. Clone the Repository**
+### **Clone the Repository**
 ```bash
 git clone https://github.com/pfabrici/iceduck.git
 cd iceduck
 ```
 
-### **2. Initialize and Start the Stack**
-```bash
-./iceduck init   # Prepares configs and starts the stack (first time only)
-./iceduck start  # Starts the stack (equivalent to `docker compose up -d`)
-```
+### **Run Iceduck**
+The ```iceduck``` script located in the main folder of the repo provides functions to handle the entire stack :
+| Command | Description |
+|---------|----------------------------|
+| help | prints out a text that explains the usage of the script |
+| init |  prepares the iceduck environment according to the settings in etc/iceduck.env, builds the necessary images, starts the Docker container" and finally creates the demo Users, Buckets and Catalogs |
+| clean | reverses the init command, stops the stack and removes all persistent data |
+| stop | stops the previously initialized stack without removing data |
+| start | starts a previously initialized stack |
+| restart | shortcut to stop and start Iceduck |
+| status | checks if Iceduck is running |
+| build | rebuilds the custom images |
 
-### **3. Stop or Clean Up**
+Simply run 
 ```bash
-./iceduck stop    # Stops the stack (equivalent to `docker compose down`)
-./iceduck clean   # Stops the stack AND removes all runtime data
+./iceduck init 
 ```
-
+from the main folder of the repo to get started.
 > **⚠️ Note:** All wrapper scripts must be run from the **main folder** of the repo.
 
 ---
 
-## **Accessing Services**
-Once the stack is running, you can access the following services:
+## **Start working and interacting with Iceduck**
+Once the stack is running, you have a couple of options to interact with the stack. Beside some Web-UIs, Iceduck provides CLI wrappers to directly interact with the services. Some services  expose ports that enable you to connect with 3rd party tools as well.
 
-| Service | URL | Credentials | Wrapper Script |
-|---------|-----|-------------|----------------|
-| **MinIO Web UI** | [http://localhost:9001](http://localhost:9001) | `admin` / `password` | `bin/mc` |
-| **Trino Web UI** | [http://localhost:8060](http://localhost:8060) | `admin` | `bin/trino` |
-| **Jupyter Notebooks** | [http://localhost:8888](http://localhost:8888) | - | - |
-| **Spark UI** | [http://localhost:8080](http://localhost:8080) | - | - |
-| **Postgres** | `localhost:5432` | `postgres` / `password` | `bin/psql` |
-| **Polaris Admin** | - | - | `bin/iceshell`, `bin/poladm` |
+### **CLI** 
+The provided CLI wrappers provide three run modes 
+* shell is the default mode and opens an interactive shell where possible
+* file is used with the ```-f <file>``` option. It runs all commands in <file> with the cli
+* command is executed with ```-c "<command>"```. It executes one single command using the tools cli and exits 
+Note that not all wrapper provide all modes.
 
-### **MinIO**
-- **Manage buckets and objects** using the `mc` CLI tool:
-  ```bash
-  bin/mc ls minio/warehouse  # List buckets
-  ```
-- **Web UI:** [http://localhost:9001](http://localhost:9001) (Default credentials: `admin` / `password`)
+The wrapper CLIs live in the ```iceduck_net``` Docker network of the whole stack and have therefore access to all internal services. The variables defined in ```etc/iceduck.env``` are made available in the CLI wrappers where possible.
 
-### **Trino**
-- **Run SQL queries** against Iceberg, Postgres, and other catalogs:
-  ```bash
-  bin/trino
-  ```
-  Example:
-  ```sql
-  SHOW CATALOGS;  -- Lists available catalogs (e.g., `warehouse`, `pgice`)
-  ```
+Here is an overview of all available wrappers :
 
-### **Postgres**
-- **Connect via `psql`**:
-  ```bash
-  bin/psql
-  ```
-- **JDBC URL:** `jdbc:postgresql://localhost:5432/postgres`
+| Wrapper script | Description | ext. Documentation |
+|----------------|--------------------|-----|
+| bin/duckdb | runs a DuckDB CLI in a Docker container. Uses a persistent workspace. Creates a default DuckDB *iceduck.duckdb* at first usage where you can persist settings and data. Note that you can only run one duckdb wrapper at a time due to locking scenarios. The wrapper is using Iceducks Docker network to allow direct connection to the other services. All Iceduck variables are available in this cli.  | [DuckDB CLI](https://duckdb.org/docs/current/clients/cli/overview)
+||Here is a file mode example for *bin/duckdb* that tries to create some objects in the Data Lakehouse: ```bin/duckdb -f files/scripts/duckdb/01_prepare.sql && bin/duckdb -f files/scripts/duckdb/02_create_objects.sql```. There are some more scripts in this folder that demonstrate the use of the wrapper and DuckDB in general.
+| bin/iceshell | iceshell is a simple shell that has access to all internal services of the stack. This is useful to run e.g. curl commands on API. It is mainly used in the init scripts. iceshell lives in the same Docker network as the rest of the stack. |
+| bin/mc  | mc is the MinIO console. It allows to create and manage buckets and other MinIO objects. Iceduck init creates an alias *minio* that allows you to directly work with the initialized buckets.  | [external mc Documentation](https://minio.github.io/mc/)  | 
+| bin/poladm | poladm provides a shell contains the Polaris Admin tool. This is used to bootstrap Polaris by Iceduck init. | [Polaris admin tool](https://polaris.apache.org/releases/1.5.0/admin-tool/) |
+| bin/psql | psql starts the Postgres CLI and connects as user *postgres* to the default *postgres* database. There are three predefined databases : postgres(default),polaris(the polaris metastore),iceduck(explorational database with pg_duckdb installed) The wrapper makes all Iceduck variables available. | [Postgres CLI](https://www.postgresql.org/docs/current/app-psql.html) |
+| bin/pyspark | this wrapper opens the pyspark cli with a pre-configured Spark Session. There are a couple of Python libraries pre-loaded, see *files/docker/spark/requirements.txt* to see which are available. | [PySpark CLI](https://pyspark.itversity.com/01_getting_started_pyspark/11_launching_pyspark_cli.html)
+| bin/sparkshell | |
+| bin/sparksql | wrapper allows to directly run Spark-SQL commands. The environment is preconfigured, so it is possible to connect to the Polaris catalog and S3. | [Spark-SQL](https://spark.apache.org/docs/latest/sql-distributed-sql-engine-spark-sql-cli.html) |
+|| Here is a file mode examle of *bin/sparksql* that tries to create table objects in the Data Lakehouse ```bin/sparksql -f files/scripts/sparksql/02_create_objects.sql```. There are some more sql files in this folder to demonstrate the use of SparkSQL with the Data Lakehouse.
+| bin/trino | The wrapper runs the trino sql cli which has preconfigured access to the Data Lakehouse and the Postgres iceduck DB. The configuration of the pre-configured trino catalogs can be found at *files/data/trino/etc/catalog*   | [Trino SQL](https://trino.io/docs/current/language.html) |
+||Here is a file mode example of *bin/trino* that tries to create some table objects in the Data Lakehouse ```bin/trino -f files/scripts/trino/02_create_objects.sql```. There are some more files in this script folder that demonstrate the use of *trino* with the Iceduck Data Lakehouse.
 
-### **Spark & Jupyter**
-- **Jupyter Notebooks:** [http://localhost:8888](http://localhost:8888)
-- **Spark UI:** [http://localhost:8080](http://localhost:8080) (Monitor running Spark jobs)
+### **WebUI**
+Some services provide an WebUI for interaction or monitoring services :
 
-### **Polaris (Iceberg Catalog)**
-- **Manage catalogs and permissions** via API or CLI:
-  ```bash
-  bin/iceshell  # Shell with curl and environment variables
-  bin/poladm   # Polaris admin tools (e.g., for bootstrapping)
-  ```
+| Service | Purpose | URL | Credentials | 
+|---------|--------|-----|-------------|
+| **MinIO Web UI** | Dislay and interact with S3 Buckets | [http://localhost:9000](http://localhost:9000) | `admin` / `password` | 
+| **Trino Web UI** | view Trino processes | [http://localhost:8060](http://localhost:8060) | `admin` | 
+| **Jupyter Notebooks** | write and execute notebooks | [http://localhost:8888](http://localhost:8888) | - | 
+| **Spark UI** | View Spark process details | [http://localhost:8080](http://localhost:8080) | - | 
+
+### **Port access**
+Some Services provide interfaces as displayed here :
+
+| Service | Purpose | URL | Credentials | 
+|---------|--------|-----|-------------|
+| **Postgres** | Connect client tools to Postgres with JDBC |`localhost:5432` | `postgres` / `s3cr3t` | 
+| **Trino** | Connect client tools to Trino with JDBC |`localhost:8060` | `trino` / `` | 
+| **Polaris** | Catalog REST API |`localhost:8181/api/catalog/v1` | |
+| **Polaris** | Polaris Management REST API |`localhost:8182` | |
+
+---
+## **Predefined Examples**
+A collection of scripts working with the stack can be found in *files/scripts* . See the wrapper or WebUI section to see how they can be executed.
 
 ---
 
@@ -138,6 +143,18 @@ We welcome contributions! Here’s how you can help:
 
 > **⭐ Support the Project**
 > If you find Iceduck useful, **star this repo** and share it with others!
+
+## **Inspirations**
+Insiprations for this repo were found here :
+- [IcebergLakeHouse](https://iceberglakehouse.com/)
+- [Why Open Table Formats Matter (Apache Iceberg)](https://iceberg.apache.org/docs/latest/why-iceberg/)
+- [Data Lakehouse vs. Data Warehouse (Databricks)](https://www.databricks.com/glossary/what-is-a-data-lakehouse)
+- [Build a Data Lakehouse with Iceberg, Polaris, Trino, MinIO (Medium)](https://medium.com/@gilles.philippart/build-a-data-lakehouse-with-apache-iceberg-polaris-trino-minio-349c534ecd98)
+- [Databricks Docker Spark Iceberg](https://github.com/databricks/docker-spark-iceberg/blob/main/docker-compose.yml)
+- [DuckDB Postgres Extension](https://duckdb.org/docs/stable/core_extensions/postgres)
+- [Apache Iceberg Documentation](https://iceberg.apache.org/docs/latest/)
+- [Trino Documentation](https://trino.io/docs/current/)
+
 
 ---
 ## **Contact**
