@@ -1,5 +1,26 @@
 #!/bin/bash
 
+_usage() {
+	echo "Usage: iceduck <command>"
+	echo ""
+	echo "This is the main control script to manage the Iceduck DataLakehouse environment"
+	echo "Choose between the following commands:"
+	echo ""
+	echo "    help: Displays this help text"
+	echo "    init: prepares the iceduck environment according to the settings in etc/iceduck.env,"
+	echo "          builds the necessary images, starts the Docker container"
+	echo "          and finally creates the demo Users, Buckets and Catalogs"
+	echo "    clean: reverses the init process and cleans up"
+	echo "    stop: stops the initialized Iceduck environment without cleaning up"
+	echo "    start: starts an already initialized Iceduck environment"
+	echo "    restart: shortcut for stop and start"
+	echo "    status: checks the status of the Iceduck stack"
+	echo "    build: rebuilds the custom images"
+	echo
+
+	_abort 0 "Ok"
+}
+
 _prep_folders() {
         mkdir -p ./files/data/mc \
         ./files/data/postgres/data \
@@ -14,94 +35,108 @@ _prep_folders() {
 
 _abort() {
         ERRORCODE=$1
+	shift
+	ERRMSG=$*
 
-        echo "Script ended unsuccessfull with $ERRORCODE"
+        echo "${ERRMSG} (${ERRORCODE})"
+
+	cd $START_DIR
         exit $ERRORCODE
 }
 
 START_DIR=$PWD
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+COMPOSE_FILE=files/docker/docker-compose.yaml
+
 cd $SCRIPT_DIR
 
 set -a
 source ./etc/iceduck.env
 
 case $1 in
+    help)   _usage
+	    ;;
     init)   echo "Initializing"
 
-            echo "----- Datenverzeichnisse anlegen"
+            echo "----- Create data folder"
             _prep_folders 
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 100 "Failed at preparing the folder structure"
 
-            echo "----- Trino config schreiben"
+            echo "----- prepare Trino config"
             ./files/init/prep_trino.sh
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 101 "Failed preparing the trino config"
 
             echo "----- configure Spark"
             ./files/init/prep_spark.sh
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 102 "Failed preparing the Spark config"
 
             echo "----- configure DuckDB"
             ./files/init/prep_duckdb.sh
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 103 "Failed preparing the DuckDB environment"
 
             echo "----- prepare the Docker network"
             docker network inspect iceduck_net 2>&1 >/dev/null
             [ $? -ne 0 ] && {
                  docker network create -d bridge iceduck_net
-                 [ $? -ne 0 ] && { _abort 10; }
+                 [ $? -ne 0 ] && _abort 104 "Failed to create the docker network"
 	    }
 
             echo "----- Stack starten"
-            docker compose -f files/docker/docker-compose.yaml up -d
-            [ $? -ne 0 ] && { _abort 10; }
+            docker compose -f ${COMPOSE_FILE} up -d
+            [ $? -ne 0 ] && _abort 105 "Failed to start Iceduck"
 
             echo "----- Bucket im Minio anlegen"
             bin/mc -f ./files/init/prep_minio.sh
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 106 "Failed to create bucket in S3"
 
             echo "----- bootstrap Polaris"
             bin/poladm -c "bootstrap -r \${POLARIS_REALM} -c \${POLARIS_REALM},\${POLARIS_ROOT_CLIENT_ID},\${POLARIS_ROOT_CLIENT_SECRET} --print-credentials"
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 107 "Failed to bootstrap Polaris"
 
             echo "----- configure Polaris"
             bin/iceshell -f ./files/init/prep_polaris.sh
-            [ $? -ne 0 ] && { _abort 10; }
-
+            [ $? -ne 0 ] && _abort 108 "Failed to setup Polaris catalog and users"
             ;;
-    build)  docker compose -f files/docker/docker-compose.yaml build
-            [ $? -ne 0 ] && { _abort 10; }
+    build)  docker compose -f ${COMPOSE_FILE} build
+            [ $? -ne 0 ] && _abort 200 "Failed to (re-)build Docker images"
             ;;
     clean)
-            docker compose -f files/docker/docker-compose.yaml down
-            [ $? -ne 0 ] && { _abort 10; }
+            docker compose -f ${COMPOSE_FILE} down  -- remove-orphans
+            [ $? -ne 0 ] && _abort 300 "Failed to stop the Iceduck docker stack"
 
             echo "----- prepare the Docker network"
             docker network inspect iceduck_net 2>&1 >/dev/null
             [ $? -eq 0 ] && {
 	    	docker network rm iceduck_net
-            	[ $? -ne 0 ] && { _abort 10; }
+            	[ $? -ne 0 ] && _abort 301 "Failed to remove Docker network 'iceduck_net'"
 	    }
 
             sudo rm -rf ./files/data/*
-            [ $? -ne 0 ] && { _abort 10; }
-
-            _prep_folders
-            [ $? -ne 0 ] && { _abort 10; }
+            [ $? -ne 0 ] && _abort 302 "Failed to remove data folders"
 
             ;;
-    start)  docker compose -f files/docker/docker-compose.yaml up -d  
-            [ $? -ne 0 ] && { _abort 10; }
+    start)  docker compose -f ${COMPOSE_FILE} up -d  
+            [ $? -ne 0 ] && _abort 400 "Could not start Iceduck"
             ;;
-    stop)   docker compose -f files/docker/docker-compose.yaml down
-            [ $? -ne 0 ] && { _abort 10; }
+    stop)   docker compose -f ${COMPOSE_FILE} down --remove-orphans
+            [ $? -ne 0 ] && _abort 500 "Could not start Iceduck"
             ;;
-    restart)   docker compose -f files/docker/docker-compose.yaml down && docker compose -f files/docker/docker-compose.yaml up -d 
-            [ $? -ne 0 ] && { _abort 10; }
+    restart)   docker compose -f ${COMPOSE_FILE} down && docker compose -f ${COMPOSE_FILE} up -d 
+            [ $? -ne 0 ] && _abort 600 "Could not restart Iceduck"
             ;;
-    *)      ;;
+    status) CONTAINER_NUM=`docker compose -f ${COMPOSE_FILE} ps | grep "healthy" | wc -l `
+            [ $? -ne 0 ] && _abort 700 "Status query failed"
+	    if [ ${CONTAINER_NUM} -ge 5 ] ; then
+		 _abort 0 "Iceduck is running"
+	    else
+		docker compose -f ${COMPOSE_FILE} ps
+		_abort 701 "Iceduck stack not properly running"
+	    fi
+	    ;;
+    *)      _abort 900 "$1 is no valid command"
+	    ;;
 esac    
 
 cd $START_DIR
-exit $ECODE
+_abort 0 "Ok"
 
